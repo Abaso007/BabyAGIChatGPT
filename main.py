@@ -44,10 +44,7 @@ class BabyAGI:
     self.objective = objective
 
   def add_task(self, task: Dict):
-    if not self.task_list:
-      task_id = 1
-    else:
-      task_id = self.task_list[-1]["task_id"] + 1
+    task_id = 1 if not self.task_list else self.task_list[-1]["task_id"] + 1
     task.update({"task_id": task_id})
     self.task_list.append(task)
 
@@ -85,9 +82,10 @@ class BabyAGI:
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": f"Objective: {objective}. Task: {task}."},
     ]
-    for snippet in context_str.split('\n'):
-        messages.append({"role": "assistant", "content": snippet})
-
+    messages.extend({
+        "role": "assistant",
+        "content": snippet
+    } for snippet in context_str.split('\n'))
     response = openai.ChatCompletion.create(
       model="gpt-3.5-turbo",
       messages=messages,
